@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mumble-server.fullname" . }}
+  labels:
+    {{- include "mumble-server.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "mumble-server.fullname" . }}
+  selector:
+    matchLabels:
+      {{- include "mumble-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "mumble-server.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "mumble-server.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: mumble-udp
+          containerPort: 64738
+          protocol: UDP
+        env:
+        - name: MUMBLE_ICE
+          value: "tcp -h 127.0.0.1 -p 6502"
+        {{- if .Values.tls.secretName }}
+        - name: MUMBLE_ENABLESSL
+          value: "1"
+        - name: MUMBLE_CERTFILE
+          value: /tls/{{ .Values.tls.cert }}
+        - name: MUMBLE_KEYFILE
+          value: /tls/{{ .Values.tls.key }}
+        - name: MUMBLE_CAFILE
+          value: ""
+        - name: MUMBLE_DHFILE
+          value: ""
+        {{ end }}
+        {{- with .Values.config.serverPassword }}
+        - name: MUMBLE_SERVERPASSWORD
+          value: {{ . }}
+        {{ end }}
+        {{- if .Values.config.suggestVersion }}
+        - name: MUMBLE_SUGGESTVERSION
+          value: {{ tpl .Values.config.suggestVersion . }}
+        {{ end }}
+        # livenessProbe:
+        #   tcpSocket:
+        #     port: 64738
+        # readinessProbe:
+        #   tcpSocket:
+        #     port: 64738
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        volumeMounts:
+        {{- if .Values.tls.secretName }}
+        - name: tls
+          mountPath: /tls
+        {{ end }}
+      {{ if .Values.ldap.enabled }}
+      - name: ldap
+        image: docker.io/samcday/mumble-ldap-auth
+        env:
+        {{ with .Values.ldap }}
+        - name: LDAP_URI
+          value: {{ .uri }}
+        - name: LDAP_BIND_DN
+          value: {{ .bindDn }}
+        - name: LDAP_BIND_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .bindPasswordSecret.name }}
+              key: {{ .bindPasswordSecret.key }}
+        - name: LDAP_USERS_DN
+          value: {{ .usersDn }}
+        - name: LDAP_ATTR_ROOM_NUMBER
+          value: {{ .roomNumberAttr }}
+        - name: LDAP_PROVIDE_INFO
+          value: "true"
+        {{ end }}
+      {{ end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tls.secretName }}
+      volumes:
+      - name: tls
+        secret:
+          secretName: {{ . }}
+      {{ end }}
