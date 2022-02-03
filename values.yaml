@@ -71,4 +71,6 @@ ldap:
   bindPasswordSecret:
     secretName: ''
     key: password
-  
+  usersDn: ''
+  roomNumberAttr: ''
+  provideInfo: false
