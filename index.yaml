@@ -3,7 +3,17 @@ entries:
   mumble-server:
   - apiVersion: v2
     appVersion: v1.4.230
-    created: "2022-02-03T09:00:25.127731392+01:00"
+    created: "2022-02-03T09:19:15.172429272+01:00"
+    description: Mumble is an open-source, low-latency, high quality voice chat software.
+    digest: cbb34d390afb4b14ac5e3b1cb8807b8bf688f2148f167b1472b9b3ad624143eb
+    name: mumble-server
+    type: application
+    urls:
+    - https://samcday.github.io/helm-mumble-server/mumble-server-0.0.2.tgz
+    version: 0.0.2
+  - apiVersion: v2
+    appVersion: v1.4.230
+    created: "2022-02-03T09:19:15.172081637+01:00"
     description: Mumble is an open-source, low-latency, high quality voice chat software.
     digest: 13c2e270bcc4d8cc2ca2707888f04708337de3ffbd6b0a6d64f6934af70fcdcf
     name: mumble-server
@@ -11,4 +21,4 @@ entries:
     urls:
     - https://samcday.github.io/helm-mumble-server/mumble-server-0.0.1.tgz
     version: 0.0.1
-generated: "2022-02-03T09:00:25.126930282+01:00"
+generated: "2022-02-03T09:19:15.171590542+01:00"
