@@ -2,6 +2,7 @@ name: Release Chart
 on:
   push:
     tags: []
+    branches: []
 jobs:
   release:
     runs-on: ubuntu-latest
