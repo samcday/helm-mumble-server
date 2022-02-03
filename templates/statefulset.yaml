@@ -90,7 +90,7 @@ spec:
         - name: LDAP_ATTR_ROOM_NUMBER
           value: {{ .roomNumberAttr }}
         - name: LDAP_PROVIDE_INFO
-          value: {{ .provideInfo }}
+          value: {{ .provideInfo | quote }}
         {{ end }}
       {{ end }}
       {{- with .Values.nodeSelector }}
